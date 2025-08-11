@@ -10,7 +10,6 @@ import type { ColumnProps } from '@douyinfe/semi-ui/lib/es/table';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const { bind } = useBindECommerce();
@@ -28,20 +27,25 @@ function App() {
         if (result.bindStatus === 'bind already') {
           toast.error("This company already bind with sql account", { duration: 2000 });
           setTimeout(() => setIsModalOpen(false), 200);
-          setIsDialogOpen(true);
         } else {
           toast.success("Company successfully bound!");
           setTimeout(() => setIsModalOpen(false), 200);
-          setIsDialogOpen(true);
+        }
+      }else{
+        if (result.bindStatus === 'failed to decode access key') {
+            toast.error("Please input valid access key and secret key", { duration: 2000 });
+            setTimeout(() => setIsModalOpen(false), 200);
         }
       }
 
-      // toast.success("Company successfully bound to account", { duration: 2000 });
-      // setTimeout(() => setIsModalOpen(false), 200);
-      // setIsDialogOpen(true);
     } catch (err: any) {
-      toast.error(err?.message || "Failed to bind company", { duration: 2000 });
-      setTimeout(() => setIsModalOpen(false), 200);
+      if (err?.message === 'bind to another company') {
+            toast.error("This company already bind with other sql account", { duration: 2000 });
+            setTimeout(() => setIsModalOpen(false), 200);
+       }else{
+        toast.error(err?.message || "Failed to bind company", { duration: 2000 });
+        setTimeout(() => setIsModalOpen(false), 200);
+       }
     }
   };
 

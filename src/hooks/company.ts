@@ -39,8 +39,11 @@ export function usePullOrder() {
     const dbName = JSON.parse(localStorage.getItem('dbName') || 'null');
     if (!dbName) throw new Error('No database name found in local storage');
 
+    const access_key = JSON.parse(localStorage.getItem('access_key') || 'null');
+    if (!access_key) throw new Error('No access_key found in local storage');
+
     // Pass to backend service
-    const result = await pullOrder(dbName);
+    const result = await pullOrder(dbName, access_key);
     return result.data;
   };
 
@@ -52,6 +55,9 @@ export function usePushProduct() {
 
     const dbName = JSON.parse(localStorage.getItem('dbName') || 'null');
     if (!dbName) throw new Error('No database name found in local storage');
+
+     const access_key = JSON.parse(localStorage.getItem('access_key') || 'null');
+    if (!access_key) throw new Error('No access_key found in local storage');
 
     const products: Product[] = [
       {
@@ -111,7 +117,7 @@ export function usePushProduct() {
     ];
 
     // Pass to backend service
-    await pushProduct({ dbName, stock_items: products });
+    await pushProduct({ dbName, stock_items: products, access_key });
   };
 
   return { pushData };

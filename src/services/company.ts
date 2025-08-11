@@ -10,6 +10,7 @@ interface BindPayload {
 interface ProductPayload {
   dbName: string;
   stock_items: Product[];
+  access_key: string;
 }
 
 export async function bindToBackend(payload: BindPayload) {
@@ -26,26 +27,18 @@ export async function bindToBackend(payload: BindPayload) {
 
    const data = await response.json();
 
-   console.log("data", data)
-
-   console.log("dbName", data.data.dbName)
-   console.log("message", data.data.statusMsg)
-
   if (!response.ok) {
     if (data?.message && data.data.statusMsg == "another company") {
       return { success: false, bindStatus: data.data.statusMsg};
     }
+    if (data?.message && data.message == "failed to decode access key") {
+      return { success: false, bindStatus: data.message};
+    }
     throw new Error(data?.message || 'Failed to bind to backend');
   }
 
-  // if (data?.message && data.statusMsg.toLowerCase().includes('bind already')) {
-  //     if (data?.dbName) {
-  //       localStorage.setItem('dbName', data.dbName);
-  //     }
-  //     return { success: true, bindStatus: data.statusMsg };
-  //   }
-
   localStorage.setItem('dbName', JSON.stringify(data.data.dbName));
+  localStorage.setItem('access_key', JSON.stringify(payload.access_key));
 
   return { success: true, bindStatus: data.data.statusMsg };
 }
@@ -58,6 +51,7 @@ export async function pushProduct(payload: ProductPayload) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${payload.access_key}`
     },
     body: JSON.stringify(payload),
   });
@@ -71,7 +65,7 @@ export async function pushProduct(payload: ProductPayload) {
   return data;
 }
 
-export async function pullOrder(dbName: string): Promise<ApiResponse<OrderData[]>>  {
+export async function pullOrder(dbName: string, access_key: string): Promise<ApiResponse<OrderData[]>>  {
   console.log('Sending to backend:', dbName);
 
   // Replace this with real API call:
@@ -81,6 +75,7 @@ export async function pullOrder(dbName: string): Promise<ApiResponse<OrderData[]
     method: "GET",
     headers: {
       Accept: "application/json",
+      'Authorization': `Bearer ${access_key}`
     },
   });
 
