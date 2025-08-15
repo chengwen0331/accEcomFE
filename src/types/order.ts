@@ -1,6 +1,5 @@
 export interface OrderData {
   data: SQLData;
-  store_name: string;
   order_items?: OrderItem[];
 }
 
@@ -8,6 +7,7 @@ export interface SQLData {
   order_id: string;
   platform: string;
   storeID: string;
+  storeName: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -16,7 +16,7 @@ export interface SQLData {
   settlement: SettlementItem[];
   totalAmount: string;
   currency: string;
-  statuses: string[];
+  status: number;
   totalReleasedAmount?: number | null;
   refundAmount: number;
   orderCreatedDate: string;

@@ -11,7 +11,7 @@ export function useBindECommerce() {
     if (!accessKey || !secretKey) throw new Error('Missing access or secret key');
 
     // Generate a random company ID
-    const companyId = "600075264272120";
+    const companyId = generateCompanyId();
 
     // Pass to backend service
     const result = await bindToBackend({ company_id: companyId, access_key: accessKey, secret_key: secretKey });

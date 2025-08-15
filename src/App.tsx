@@ -53,10 +53,8 @@ function App() {
     try {
       await pushData();
       toast.success("Product successfully push to SQL Ecommerce", { duration: 2000 });
-      // setTimeout(() => setIsDialogOpen(false), 200);
     } catch (err: any) {
       toast.error(err?.message || "Failed to push product data", { duration: 2000 });
-      // setTimeout(() => setIsDialogOpen(false), 200);
     }
   };
 
@@ -66,11 +64,19 @@ function App() {
       toast.success("Order successfully pulled from SQL Ecommerce", { duration: 2000 });
       console.log("order:", result)
       setOrders(result);
-      // setTimeout(() => setIsDialogOpen(false), 200);
     } catch (err: any) {
       toast.error(err?.message || "Failed to pull order data", { duration: 2000 });
-      // setTimeout(() => setIsDialogOpen(false), 200);
     }
+  };
+
+  const statusLabels: Record<number, string> = {
+    0: "Unpaid",
+    1: "To Ship",
+    2: "Shipped",
+    3: "Cancelled",
+    4: "Returned",
+    5: "Delivered",
+    6: "Completed",
   };
 
 const columns: ColumnProps<OrderData>[] = [
@@ -93,7 +99,7 @@ const columns: ColumnProps<OrderData>[] = [
       key: 'store_name',
       width: 200,
       ellipsis: false,
-      render: (_text, record) => record.store_name,
+      render: (_text, record) => record.data.storeName,
     },
     {
       title: 'Customer',
@@ -116,11 +122,18 @@ const columns: ColumnProps<OrderData>[] = [
       ellipsis: false,
       render: (_text, record) =>
         <div style={{ display: 'flex', flexWrap: 'wrap', overflow: 'visible' }}>
-          {record.data.statuses.map((status: string, idx: number) => (
-            <Tag key={idx} color="blue" style={{ marginRight: 4 }}>
-              {status}
-            </Tag>
-          ))}
+          {Array.isArray(record.data.status)
+            ? record.data.status.map((status: number, idx: number) => (
+                <Tag key={idx} color="blue" style={{ marginRight: 4 }}>
+                  {statusLabels[status] ?? `Unknown (${status})`}
+                </Tag>
+              ))
+            : (
+                <Tag color="blue">
+                  {statusLabels[record.data.status] ?? `Unknown (${record.data.status})`}
+                </Tag>
+              )
+          }
         </div>
     },
   ];
@@ -130,15 +143,12 @@ const columns: ColumnProps<OrderData>[] = [
     <Toaster position="top-right" reverseOrder={false} />
       <div className="card">
         <div style={{ padding: 20 }}>
-          {/* <Button type="tertiary" onClick={() => setIsModalOpen(true)}>SQL E-Commerce</Button> */}
           {isSuccess ? (
-            // Show Pull/Push buttons when bind is successful
             <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
               <Button type="primary" onClick={handlePull}>Pull</Button>
               <Button type="primary" onClick={handlePush}>Push</Button>
             </div>
           ) : (
-            // Show bind button when not bound
             <Button type="tertiary" onClick={() => setIsModalOpen(true)}>SQL E-Commerce</Button>
           )}
         </div>
@@ -170,18 +180,6 @@ const columns: ColumnProps<OrderData>[] = [
           <Button type="primary" onClick={handleBind}>Bind</Button>
         </div>
       </Modal>
-
-      {/* <Modal
-        title="E-Commerce"
-        visible={isDialogOpen}
-        onCancel={() => setIsDialogOpen(false)}
-        footer={null}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Button type="primary" onClick={handlePull}>Pull</Button>
-          <Button type="primary" onClick={handlePush}>Push</Button>
-        </div>
-      </Modal> */}
 
       {orders.length > 0 && (
       <Table
